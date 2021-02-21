@@ -1,0 +1,36 @@
+1、使用root用户登录，进入到目录/root/.ssh
+
+2、执行命令：ssh-keygen -t rsa
+
+一路回车，完成后会在目录/root/.ssh下面生成文件 id_rsa和id_rsa.pub
+
+3、将公钥写入文件authorized_keys：cat id_rsa.pub >> authorized_keys
+
+4、重复1、2、3，直到要免密登录的所有机器都生成了id_rsa和id_rsa.pub文件和authorized_keys
+
+5、将其他机器的公钥拷贝到第一台机器authorized_keys文件中：
+
+ssh-copy-id -i ~/.ssh/id_rsa.pub root@ip
+
+6、将第一台机器的authorized_keys复制到其他机器
+
+scp /root/.ssh/authorized_keys ip:/root/.ssh/
+
+提示报错：Permission denied, please try again.
+
+可能原因：
+
+1、目录或文件没有写权限（默认不会），解决：chmod 700 .ssh chmod 644 authorized_keys
+
+2、ssh服务需要修改下配置，解决：
+
+修改目标服务器的/etc/ssh/sshd_config中的PermitRootLogin 为 yes ，然后重启ssh（systemctl restart sshd.service）
+
+
+ssh 192.168.13.101
+
+ssh 192.168.13.102
+
+ssh hadoop101
+
+ssh hadoop102

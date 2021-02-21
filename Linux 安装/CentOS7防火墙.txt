@@ -1,0 +1,4 @@
+firewall-cmd --state #查看默认防火墙状态（关闭后显示notrunning，开启后显示running）
+systemctl stop firewalld.service #停止firewall
+systemctl disable firewalld.service #禁止firewall开机启动
+init 6  #重启虚拟机，然后再输入第一条命令查看防火墙状态

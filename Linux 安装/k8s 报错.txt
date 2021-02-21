@@ -1,0 +1,10 @@
+主机重启后，k8s 不能启动
+1、查看错误信息：
+journalctl -xefu kubelet
+a:k8s 重启报错如果报：
+failed to run Kubelet: misconfiguration: kubelet cgroup driver: "cgroupfs" is different from docker cgroup driver: "systemd"
+需要修改：/usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+1、增加：Environment="KUBELET_CGROUP_ARGS=--cgroup-driver=systemd"
+2、/var/lib/kubelet/kubeadm-flags.env
+KUBELET_KUBEADM_ARGS="--cgroup-driver=cgroupfs --network-plugin=cni --pod-infra-container-image=registry.aliyuncs.com/k8sxio/pause:3.2"
+改为：KUBELET_KUBEADM_ARGS="--cgroup-driver=cgroupfs --network-plugin=cni --pod-infra-container-image=registry.aliyuncs.com/k8sxio/pause:3.2"

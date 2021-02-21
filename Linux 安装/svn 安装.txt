@@ -1,0 +1,50 @@
+﻿第一步：通过yum命令安装svnserve，命令如下
+yum -y install subversion
+第二步：创建版本库目录
+mkdir /usr/local/svnrepos
+第三步：创建svn版本库
+svnadmin create /usr/local/svnrepos/sprng-cloud-demo
+第四步：配置修改
+进入刚才创建的版本库 conf
+cd /usr/local/svnrepos/sprng-cloud-demo/conf/
+添加用户
+vi passwd
+添加权限
+vi
+
+
+firewall-cmd --zone=public --add-port=3690/tcp --permanent
+/usr/local/svnrepos/doc
+
+
+svnadmin create /usr/local/svnrepos/doc/文档资料
+
+
+开机启动svn 服务
+1：编辑  /etc/sysconfig/svnserve
+将 OPTIONS="-r /var/svn" 改为 svn 版本库存放的目录，:wq 保存退出
+2：执行
+systemctl enable svnserve.service  
+3：启动svn服务
+systemctl start svnserve.service
+systemctl stop svnserve.service
+
+5:重启Linux服务器，重启后查看svn服务器是否已经开启
+  #  ps -ef|grep svnserve
+  
+  
+  备注：
+    常用命令：
+	 1.1 ：查看绝对路劲
+	 which svnserve
+	 
+	 
+	 
+	 chmod -R o+rw /usr/local/svnrepos/   
+	 
+	 vi /usr/lib/systemd/system/svnserve.service
+	 
+	 
+	 #ExecStart=/usr/bin/svnserve --daemon --pid-file=/run/svnserve/svnserve.pid $OPTIONS
+	 
+	 vi /etc/sysconfig/svnserve  

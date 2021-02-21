@@ -1,0 +1,146 @@
+第一步：docker 安装
+1、卸载docker 相关文件
+yum remove -y docker docker-client  docker-client-latest  docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine
+2、设置仓库
+yum install -y yum-utils device-mapper-persistent-data lvm2
+3、设置阿里云镜像
+yum-config-manager  --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+4、安装 Docker Engine-Community 
+yum -y install docker-ce docker-ce-cli containerd.io
+5、或者安装特定版本的 Docker Engine-Community，请在存储库中列出可用版本，然后选择并安装
+yum list docker-ce --showduplicates | sort -r
+  5.1、通过其完整的软件包名称安装特定版本，该软件包名称是软件包名称（docker-ce）加上版本字符串（第二列），从第一个冒号（:）一直到第一个连字符，并用连字符（-）分隔。例如：docker-ce-18.09.1。
+docker-ce.x86_64            3:19.03.9-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.8-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.7-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.6-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.5-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.4-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.3-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.2-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.1-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:19.03.12-3.el7                   docker-ce-stable
+docker-ce.x86_64            3:19.03.12-3.el7                   @docker-ce-stable
+docker-ce.x86_64            3:19.03.11-3.el7                   docker-ce-stable
+docker-ce.x86_64            3:19.03.10-3.el7                   docker-ce-stable
+docker-ce.x86_64            3:19.03.0-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.9-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.8-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.7-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.6-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.5-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.4-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.3-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.2-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.1-3.el7                    docker-ce-stable
+docker-ce.x86_64            3:18.09.0-3.el7                    docker-ce-stable
+docker-ce.x86_64            18.06.3.ce-3.el7                   docker-ce-stable
+docker-ce.x86_64            18.06.2.ce-3.el7                   docker-ce-stable
+docker-ce.x86_64            18.06.1.ce-3.el7                   docker-ce-stable
+docker-ce.x86_64            18.06.0.ce-3.el7                   docker-ce-stable
+docker-ce.x86_64            18.03.1.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            18.03.0.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.12.1.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.12.0.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.09.1.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.09.0.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.06.2.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.06.1.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.06.0.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.03.3.ce-1.el7                   docker-ce-stable
+docker-ce.x86_64            17.03.2.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.03.1.ce-1.el7.centos            docker-ce-stable
+docker-ce.x86_64            17.03.0.ce-1.el7.centos            docker-ce-stable
+
+5.1、通过其完整的软件包名称安装特定版本，该软件包名称是软件包名称（docker-ce）加上版本字符串（第二列），从第一个冒号（:）一直到第一个连字符，并用连字符（-）分隔。例如：docker-ce-18.09.1。
+yum install docker-ce-<VERSION_STRING> docker-ce-cli-<VERSION_STRING> containerd.io
+yum install docker-ce-19.03.9 docker-ce-cli-19.03.9 containerd.io
+6、启动 Docker
+systemctl start docker
+7、通过运行 hello-world 映像来验证是否正确安装了 Docker Engine-Community 
+docker run hello-world
+8、docker 创建完成后，docker的iptables 会接管 centos 的firewall，因此要做一些修改，才能访问docker 容器。
+8.1、在firewall 中移除 DOCKER-USER
+# Removing DOCKER-USER CHAIN (it won't exist at first)
+firewall-cmd --permanent --direct --remove-chain ipv4 filter DOCKER-USER
+ 8.2、移除DOCKER-USER 的rules
+# Flush rules from DOCKER-USER chain (again, these won't exist at first; firewalld seems to remember these even if the chain is gone)
+firewall-cmd --permanent --direct --remove-rules ipv4 filter DOCKER-USER
+  8.2、新建DOCKER-USER 的rules
+# Add the DOCKER-USER chain to firewalld
+firewall-cmd --permanent --direct --add-chain ipv4 filter DOCKER-USER
+8.3、根据实际情况添加一下rules
+firewall-cmd --permanent --direct --add-rule ipv4 filter DOCKER-USER 0 -i docker0 -j ACCEPT -m comment --comment "allows incoming from docker" 
+firewall-cmd --permanent --direct --add-rule ipv4 filter DOCKER-USER 0 -i docker0 -o eth0 -j ACCEPT -m comment --comment "allows docker to eth0" 
+firewall-cmd --permanent --direct --add-rule ipv4 filter DOCKER-USER 0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT -m comment --comment "allows docker containers to connect to the outside world"
+firewall-cmd --permanent --direct --add-rule ipv4 filter DOCKER-USER 0 -j RETURN -s 172.17.0.0/16 -m comment --comment "allow internal docker communication"
+
+
+
+
+第二步：创建本地docker 仓库
+1.拉取镜像仓库
+docker  pull  registry 
+2.查看所有镜像
+ docker images
+3.在主机上新建一个目录，供存储镜像
+mkdir -p /usr/local/docker/Registry
+chmod -R 777 /usr/local/docker
+4、启动镜像服务器registry
+docker run -d -p 5000:5000 --name=localhost_registry --restart=always --privileged=true  -v /usr/local/docker/Registry:/var/lib/registry  docker.io/registry
+
+解释：
+  -p 5000:5000 端口
+  --name=localhost_registry 运行的容器名称
+  --restart=always 自动重启
+  --privileged=true centos7中的安全模块selinux把权限禁止了，加上这行是给容器增加执行权限
+  -v /usr/local/docker/Registry:/var/lib/registry 把主机的 /usr/local/docker/Registry 目录挂载到registry容器的/var/lib/registry目录下，假如有删除容器操作，我们的镜像也不会被删除
+   docker.io/registry  镜像名称
+5、给docker注册https协议，支持https访问
+vi /etc/docker/daemon.json
+如果daemon文件不存在，vim会自己创建一个，假如一下代码，
+{
+"insecure-registries":["192.168.0.108:5000"],
+"registry-mirrors": ["https://registry.docker-cn.com"],
+"data-root": "/usr/local/docker/"
+}
+systemctl daemon-reload && systemctl start docker
+注释：
+  insecure-registries----->开放注册https协议
+  registry-mirrors----->仓库源
+  "data-root"-----> docker 存储位置 docker 默认存储位置为：/var/lib/docker
+
+6、重启docker
+systemctl restart docker
+7.从公有仓库拉取一个镜像下来，然后push到私有仓库中进行测试，当前用java8镜像做测试
+docker pull java:8
+8、新建一个tag，把java:8名称变成域名或者IP/镜像名称
+docker tag java:8 192.168.1.26:5000/java_8
+9、推送到本地仓库
+docker push 192.168.1.26:5000/java_8
+10.删除刚刚tag的镜像 （192.168.1.26:5000/java_8刚才创建的镜像的tag）
+docker rmi 192.168.1.26:5000/java_8
+11、拉取刚刚自己创建的镜像
+docker pull 192.168.1.26:5000/java_8
+
+idea 连接docker
+1、 vi /usr/lib/systemd/system/docker.service
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock 
+改为：
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock -H tcp://0.0.0.0:2375 -H unix://var/run/docker.sock
+
+2、重新加载配置文件和启动：
+systemctl daemon-reload && systemctl start docker
+
+spring boot 运行时候需要指定网络
+docker run -it -p 8081:8082 --net host --name cloud-main-ts idms-cloud-main:1.0
+--net host 未指定网络模式为host
+或者重新创建网络，
+docker network connect my-net 
+
+docker run -it -p 8081:8082 --net host --name cloud-main-ts idms-cloud-main:1.0
+kubeadm init --apiserver-advertise-address=192.168.244.130 --service-cidr=10.10.0.0/16 --pod-network-cidr=10.122.0.0/16 --ignore-preflight-errors=Swap
+
+
+
+

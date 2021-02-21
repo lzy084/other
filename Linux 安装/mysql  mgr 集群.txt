@@ -1,0 +1,70 @@
+一、安装mysql
+二、配置mysql my.cnf 在mysqld中加入以下配置 
+disabled_storage_engines="MyISAM,BLACKHOLE,FEDERATED,ARCHIVE,MEMORY"
+plugin_load_add='group_replication.so'
+server_id=1
+gtid_mode=ON
+enforce_gtid_consistency=ON
+master_info_repository=TABLE
+relay_log_info_repository=TABLE
+binlog_checksum=NONE
+log_slave_updates=ON
+log_bin=binlog
+binlog_format=ROW
+transaction_write_set_extraction=XXHASH64
+group_replication_single_primary_mode=OFF
+loose-group_replication_group_name="05153196-c2ab-43ae-b355-b9832eacf0b2"
+loose-group_replication_start_on_boot=off
+loose-group_replication_local_address="192.168.0.130:33061"
+loose-group_replication_group_seeds="192.168.0.130:33061,192.168.0.131:33061"
+loose-group_replication_bootstrap_group=off
+loose-group_replication_single_primary_mode=FALSE
+loose-group_replication_enforce_update_everywhere_checks= TRUE
+三、在所有节点 上 执行
+SET SQL_LOG_BIN=0;
+CREATE USER rpl@'%' IDENTIFIED BY '123456';
+GRANT REPLICATION SLAVE ON *.* TO rpl@'%';
+GRANT BACKUP_ADMIN ON *.* TO rpl@'%';
+FLUSH PRIVILEGES;
+SET SQL_LOG_BIN=1;
+FLUSH PRIVILEGES;
+CHANGE MASTER TO MASTER_USER='rpl', MASTER_PASSWORD='123456'  FOR CHANNEL 'group_replication_recovery';
+INSTALL PLUGIN group_replication SONAME 'group_replication.so';
+四、其他节点加入集群 执行下面语句
+RESET MASTER;
+START GROUP_REPLICATION;
+五、注意问题
+1、如果是虚拟机克隆需要执行
+mv  auto.cnf auto.cnf.bak # 重新生成mysql uuid
+执行完成后重启mysql
+service mysqld restart
+
+六、切换至多主模式
+1、停止组复制(所有节点执行)
+stop group_replication;
+set global group_replication_single_primary_mode=OFF;
+set global group_replication_enforce_update_everywhere_checks=ON;
+
+# 随便选择某个节点执行
+SET GLOBAL group_replication_bootstrap_group=ON; 
+START GROUP_REPLICATION; 
+SET GLOBAL group_replication_bootstrap_group=OFF;
+# 其他节点执行
+START GROUP_REPLICATION; 
+# 查看组信息，所有节点的 MEMBER_ROLE 都为 PRIMARY
+SELECT * FROM performance_schema.replication_group_members;
+七、参数解释
+
+#plugin-load-add将组复制插件添加到服务器在启动时加载的插件列表中。在生产部署中，这比手动安装插件更好。
+plugin_load_add='group_replication.so'
+transaction_write_set_extraction=XXHASH64
+#配置 group_replication_group_name 告诉插件将其加入或创建的组命名为“ aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaaaaaa”。
+group_replication_group_name="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+#配置变量以off指示插件在服务器启动时不自动启动操作。这在设置组复制时非常重要，因为它可以确保您可以在手动启动插件之前配置服务器。配置成员后，您可以设置 group_replication_start_on_boot 为，on以便在服务器启动时自动启动组复制。
+group_replication_start_on_boot=off
+#设置成员用于与组中其他成员进行内部通信的网络地址和端口。组复制将此地址用于涉及组通信引擎的远程实例（XCom，Paxos的变体）的内部成员间连接。
+group_replication_local_address= "s1:33061"
+#设置组成员的主机名和端口，新成员用来建立其与组的连接。这些成员称为种子成员。建立连接后，组成员身份信息将列在
+group_replication_group_seeds= "s1:33061,s2:33061,s3:33061"
+#指示插件是否引导组。在这种情况下，即使s1是组的第一个成员，我们也会在选项文件中将此变量设置为off。相反，我们配置 group_replication_bootstrap_group 实例运行的时间，以确保只有一个成员实际引导该组。
+group_replication_bootstrap_group=off
