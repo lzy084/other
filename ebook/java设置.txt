@@ -1,0 +1,10 @@
+-Xms512m -Xmx521m -Xmn256m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:MinMetaspaceFreeRatio=20 -XX:MaxMetaspaceFreeRatio=95
+DarchetypeCatalog=local
+set password for 'root'@'localhost%'=password('root');
+UPDATE user SET password=PASSWORD("root") WHERE user='root';
+
+
+set JAVA_OPTS=-Djava.net.preferIPv4Stack=true
+
+mvn install:install-file -DgroupId=org.apache.tomcat.maven -DartifactId=tomcat8-maven-plugin -Dversion=3.0-r1756463 -Dpackaging=jar -Dfile=E:\tomcat8-maven-plugin-3.0-r1756463.jar
+mvn install:install-file -DgroupId=org.apache.tomcat.maven -DartifactId=tomcat8-war-runner   -Dversion=3.0-r1756463 -Dpackaging=jar -Dfile=E:\tomcat8-war-runner-3.0-r1756463.jar
